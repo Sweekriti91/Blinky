@@ -69,8 +69,8 @@ namespace Blinky.BME
                             Thread.Sleep(dimTimeInMilliseconds);
                         }
                     }
-                    // //set mode forced and read again
-                    // i2CBmpe80.SetPowerMode(Bmx280PowerMode.Forced);
+                    //set mode forced and read again
+                    i2CBmpe80.SetPowerMode(Bmx280PowerMode.Forced);
 
                     // //read values
                     // tempValue = await i2CBmpe80.ReadTemperatureAsync();
@@ -78,7 +78,6 @@ namespace Blinky.BME
                     // humValue = await i2CBmpe80.ReadHumidityAsync();
                     // Console.WriteLine($"Humidity: {humValue} %");
                     // Thread.Sleep(5000);
-xs
                 }
             }
         }
