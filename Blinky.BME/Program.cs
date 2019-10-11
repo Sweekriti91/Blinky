@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Device.Gpio;
 using System.Device.I2c;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,16 +15,18 @@ namespace Blinky.BME
         {
             Console.WriteLine("Hello Bme280!");
 
-            Console.WriteLine("Hello Bme280!");
-
             //bus id on the raspberry pi 3
             const int busId = 1;
-            //set this to the current sea level pressure in the area for correct altitude readings
-            const double defaultSeaLevelPressure = 1033.00;
 
             var i2cSettings = new I2cConnectionSettings(busId, Bme280.DefaultI2cAddress);
             var i2cDevice = I2cDevice.Create(i2cSettings);
             var i2CBmpe80 = new Bme280(i2cDevice);
+
+            //LED setup
+            var pin = 17;
+            var lightTimeInMilliseconds = 1000;
+            var dimTimeInMilliseconds = 200;
+            
 
             using (i2CBmpe80)
             {
@@ -40,56 +43,42 @@ namespace Blinky.BME
                     //read values
                     Temperature tempValue = await i2CBmpe80.ReadTemperatureAsync();
                     Console.WriteLine($"Temperature: {tempValue.Celsius} C");
-
-                    double preValue = await i2CBmpe80.ReadPressureAsync();
-                    Console.WriteLine($"Pressure: {preValue} Pa");
-
-                    double altValue = await i2CBmpe80.ReadAltitudeAsync(defaultSeaLevelPressure);
-                    Console.WriteLine($"Altitude: {altValue} meters");
-
                     double humValue = await i2CBmpe80.ReadHumidityAsync();
                     Console.WriteLine($"Humidity: {humValue} %");
 
                     // Sleeping it so that we have a chance to get more measurements.
-                    Thread.Sleep(1000);
-
-                    //set higher sampling
-                    i2CBmpe80.SetTemperatureSampling(Sampling.LowPower);
-                    Console.WriteLine(i2CBmpe80.ReadTemperatureSampling());
-
-                    i2CBmpe80.SetPressureSampling(Sampling.UltraHighResolution);
-                    Console.WriteLine(i2CBmpe80.ReadPressureSampling());
-
-                    i2CBmpe80.SetHumiditySampling(Sampling.Standard);
-                    Console.WriteLine(i2CBmpe80.ReadHumiditySampling());
-
-                    i2CBmpe80.SetFilterMode(FilteringMode.Off);
-                    Console.WriteLine(i2CBmpe80.ReadFilterMode());
-
-                    //set mode forced and read again
-                    i2CBmpe80.SetPowerMode(Bmx280PowerMode.Forced);
-
-                    //read values
-                    tempValue = await i2CBmpe80.ReadTemperatureAsync();
-                    Console.WriteLine($"Temperature: {tempValue.Celsius} C");
-                    preValue = await i2CBmpe80.ReadPressureAsync();
-                    Console.WriteLine($"Pressure: {preValue} Pa");
-                    altValue = await i2CBmpe80.ReadAltitudeAsync(defaultSeaLevelPressure);
-                    Console.WriteLine($"Altitude: {altValue} meters");
-                    humValue = await i2CBmpe80.ReadHumidityAsync();
-                    Console.WriteLine($"Humidity: {humValue} %");
                     Thread.Sleep(5000);
+                    humValue = await i2CBmpe80.ReadHumidityAsync();
+                    if(humValue > 30.00)
+                    {
+                        using (GpioController controller = new GpioController())
+                        {
+                            controller.OpenPin(pin, PinMode.Output);
+                            Console.WriteLine($"GPIO pin enabled for use: {pin}");
 
-                    //set sampling to higher
-                    i2CBmpe80.SetTemperatureSampling(Sampling.UltraHighResolution);
-                    Console.WriteLine(i2CBmpe80.ReadTemperatureSampling());
-                    i2CBmpe80.SetPressureSampling(Sampling.UltraLowPower);
-                    Console.WriteLine(i2CBmpe80.ReadPressureSampling());
-                    i2CBmpe80.SetHumiditySampling(Sampling.UltraLowPower);
-                    Console.WriteLine(i2CBmpe80.ReadHumiditySampling());
+                            // Console.CancelKeyPress += (object sender, ConsoleCancelEventArgs eventArgs) =>
+                            // {
+                            //     controller.Dispose();
+                            // };
 
-                    i2CBmpe80.SetFilterMode(FilteringMode.X2);
-                    Console.WriteLine(i2CBmpe80.ReadFilterMode());
+                            Console.WriteLine($"Light for {lightTimeInMilliseconds}ms");
+                            controller.Write(pin, PinValue.High);
+                            Thread.Sleep(lightTimeInMilliseconds);
+                            Console.WriteLine($"Dim for {dimTimeInMilliseconds}ms");
+                            controller.Write(pin, PinValue.Low);
+                            Thread.Sleep(dimTimeInMilliseconds);
+                        }
+                    }
+                    // //set mode forced and read again
+                    // i2CBmpe80.SetPowerMode(Bmx280PowerMode.Forced);
+
+                    // //read values
+                    // tempValue = await i2CBmpe80.ReadTemperatureAsync();
+                    // Console.WriteLine($"Temperature: {tempValue.Celsius} C");
+                    // humValue = await i2CBmpe80.ReadHumidityAsync();
+                    // Console.WriteLine($"Humidity: {humValue} %");
+                    // Thread.Sleep(5000);
+xs
                 }
             }
         }
