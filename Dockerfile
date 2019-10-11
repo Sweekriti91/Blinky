@@ -10,7 +10,7 @@ RUN dotnet restore
 COPY . .
 RUN dotnet publish -c release -o out
 
-FROM mcr.microsoft.com/dotnet/core/runtime-deps:3.0-buster-slim-arm32v7 AS runtime
+FROM mcr.microsoft.com/dotnet/core/runtime-deps:3.0-buster-slim AS runtime
 WORKDIR /app
 COPY --from=build /app/out ./
 ENTRYPOINT ["dotnet", "led-blink.dll"]
