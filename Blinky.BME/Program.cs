@@ -47,7 +47,7 @@ namespace Blinky.BME
                     Console.WriteLine($"Humidity: {humValue} %");
 
                     // Sleeping it so that we have a chance to get more measurements.
-                    Thread.Sleep(5000);
+                    Thread.Sleep(1000);
                     humValue = await i2CBmpe80.ReadHumidityAsync();
                     if(humValue > 30.00)
                     {
@@ -55,11 +55,6 @@ namespace Blinky.BME
                         {
                             controller.OpenPin(pin, PinMode.Output);
                             Console.WriteLine($"GPIO pin enabled for use: {pin}");
-
-                            // Console.CancelKeyPress += (object sender, ConsoleCancelEventArgs eventArgs) =>
-                            // {
-                            //     controller.Dispose();
-                            // };
 
                             Console.WriteLine($"Light for {lightTimeInMilliseconds}ms");
                             controller.Write(pin, PinValue.High);
@@ -71,13 +66,6 @@ namespace Blinky.BME
                     }
                     //set mode forced and read again
                     i2CBmpe80.SetPowerMode(Bmx280PowerMode.Forced);
-
-                    // //read values
-                    // tempValue = await i2CBmpe80.ReadTemperatureAsync();
-                    // Console.WriteLine($"Temperature: {tempValue.Celsius} C");
-                    // humValue = await i2CBmpe80.ReadHumidityAsync();
-                    // Console.WriteLine($"Humidity: {humValue} %");
-                    // Thread.Sleep(5000);
                 }
             }
         }
