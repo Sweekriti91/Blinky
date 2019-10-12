@@ -14,5 +14,5 @@
    1. `docker build -t blinky/simple .` OR `docker build -t blinky/bme .`
    2. A Docker image called `blinky/simple` OR `blinky/bme` will be created.
 5. Create a container to run that image on your Raspberry Pi:
-   1. `docker run --device /dev/gpiomem blinky/simple` OR `docker run --device /dev/i2c-1 blinky/bme`
+   1. `docker run --device /dev/gpiomem blinky/simple` OR `docker run --device /dev/i2c-1 --device /dev/gpiomem blinky/bme`
    2. As a security precaution, system devices are not exposed by default inside Docker containers. You can expose specific devices to your container using the `--device` option to `docker run`
