@@ -13,20 +13,16 @@ namespace Blinky.BME
     {
         static async Task Main(string[] args)
         {
-            Console.WriteLine("Hello Bme280!");
-
-            //bus id on the raspberry pi 3
-            const int busId = 1;
-
-            var i2cSettings = new I2cConnectionSettings(busId, Bme280.DefaultI2cAddress);
-            var i2cDevice = I2cDevice.Create(i2cSettings);
-            var i2CBmpe80 = new Bme280(i2cDevice);
-
             //LED setup
             var pin = 17;
             var lightTimeInMilliseconds = 1000;
-            var dimTimeInMilliseconds = 200;
+            var dimTimeInMilliseconds = 800;
             
+             //bus id on the raspberry pi 3
+            const int busId = 1;
+            var i2cSettings = new I2cConnectionSettings(busId, Bme280.DefaultI2cAddress);
+            var i2cDevice = I2cDevice.Create(i2cSettings);
+            var i2CBmpe80 = new Bme280(i2cDevice);
 
             using (i2CBmpe80)
             {
@@ -37,7 +33,6 @@ namespace Blinky.BME
 
                     //set samplings
                     i2CBmpe80.SetTemperatureSampling(Sampling.UltraLowPower);
-                    i2CBmpe80.SetPressureSampling(Sampling.UltraLowPower);
                     i2CBmpe80.SetHumiditySampling(Sampling.UltraLowPower);
 
                     //read values
@@ -47,9 +42,9 @@ namespace Blinky.BME
                     Console.WriteLine($"Humidity: {humValue} %");
 
                     // Sleeping it so that we have a chance to get more measurements.
-                    Thread.Sleep(1000);
+                    Thread.Sleep(500);
                     humValue = await i2CBmpe80.ReadHumidityAsync();
-                    if(humValue > 30.00)
+                    if(humValue > 50.00)
                     {
                         using (GpioController controller = new GpioController())
                         {
@@ -64,8 +59,6 @@ namespace Blinky.BME
                             Thread.Sleep(dimTimeInMilliseconds);
                         }
                     }
-                    //set mode forced and read again
-                    i2CBmpe80.SetPowerMode(Bmx280PowerMode.Forced);
                 }
             }
         }
